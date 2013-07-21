@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 )
 
 const (
-	viewPath = "/view/"
-	editPath = "/edit/"
-	savePath = "/save/"
+	viewPath, viewTemplate = "/view/", "view.html"
+	editPath, editTemplate = "/edit/", "edit.html"
+	savePath               = "/save/"
 )
 
 type Page struct {
@@ -35,22 +35,20 @@ func loadPage(title string) (*Page, error) {
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len(viewPath):]
 	page, _ := loadPage(title)
-	fmt.Fprintf(w, "<h1>%s</h1><body>%s</body>", page.Title, page.Body)
+
+	t, _ := template.ParseFiles(viewTemplate)
+	t.Execute(w, page)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len(editPath):]
-	p, err := loadPage(title)
+	page, err := loadPage(title)
 	if err != nil {
-		p = &Page{title, nil}
+		page = &Page{title, nil}
 	}
 
-	fmt.Fprintf(w, "<h1>Editing %s</h1>"+
-		"<form action=\"/save/%s\" method=\"POST\">"+
-		"<textarea name=\"body\">%s</textarea><br>"+
-		"<input type=\"submit\" value=\"Save\">"+
-		"</form>",
-		p.Title, p.Title, p.Body)
+	t, _ := template.ParseFiles(editTemplate)
+	t.Execute(w, page)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
