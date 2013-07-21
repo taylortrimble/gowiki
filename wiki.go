@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 )
@@ -18,26 +17,6 @@ var (
 	templates      = template.Must(template.ParseFiles("tmpl/view.html", "tmpl/edit.html"))
 	titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
-
-type Page struct {
-	Title string
-	Body  []byte
-}
-
-func (p *Page) save() error {
-	filename := "data/" + p.Title + ".txt"
-	return ioutil.WriteFile(filename, p.Body, 0600)
-}
-
-func loadPage(title string) (*Page, error) {
-	filename := "data/" + title + ".txt"
-	body, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Page{title, body}, err
-}
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 	err := templates.ExecuteTemplate(w, tmpl, p)
