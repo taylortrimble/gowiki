@@ -16,12 +16,13 @@ const (
 )
 
 var (
-	templates      = template.Must(template.ParseFiles("tmpl/view.html", "tmpl/edit.html"))
+	viewTemplate   = template.Must(template.ParseFiles("tmpl/base.html", "tmpl/view.html"))
+	editTemplate   = template.Must(template.ParseFiles("tmpl/base.html", "tmpl/edit.html"))
 	titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl, p)
+func renderTemplate(w http.ResponseWriter, p *Page, tmpl *template.Template) {
+	err := tmpl.Execute(w, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -47,7 +48,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 		return
 	}
 
-	renderTemplate(w, "view.html", page)
+	renderTemplate(w, viewTemplate, page)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -56,7 +57,7 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 		page = &Page{title, nil}
 	}
 
-	renderTemplate(w, "edit.html", page)
+	renderTemplate(w, editTemplate, page)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
