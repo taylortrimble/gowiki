@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"html/template"
 	"net/http"
 	"regexp"
 )
@@ -16,18 +15,7 @@ const (
 	defaultPage = "Home"
 )
 
-var (
-	viewTemplate   = template.Must(template.ParseFiles("tmpl/base.html", "tmpl/view.html"))
-	editTemplate   = template.Must(template.ParseFiles("tmpl/base.html", "tmpl/edit.html"))
-	titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
-)
-
-func renderTemplate(w http.ResponseWriter, tmpl *template.Template, p *Page) {
-	err := tmpl.Execute(w, p)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
+var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 
 func getTitle(w http.ResponseWriter, path string, r *http.Request) (title string, err error) {
 	title = r.URL.Path[len(path):]
