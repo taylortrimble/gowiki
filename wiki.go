@@ -12,6 +12,8 @@ const (
 	savePath = "/save/"
 )
 
+var templates = template.Must(template.ParseFiles("view.html", "edit.html"))
+
 type Page struct {
 	Title string
 	Body  []byte
@@ -33,12 +35,7 @@ func loadPage(title string) (*Page, error) {
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	t, err := template.ParseFiles(tmpl)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = t.Execute(w, p)
+	err := templates.ExecuteTemplate(w, tmpl, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
