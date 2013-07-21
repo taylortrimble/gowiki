@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	viewPath = "/view/"
-	editPath = "/edit/"
-	savePath = "/save/"
+	rootPath    = "/"
+	viewPath    = "/view/"
+	editPath    = "/edit/"
+	savePath    = "/save/"
+	defaultPage = "Home"
 )
 
 var (
@@ -32,6 +34,10 @@ func getTitle(w http.ResponseWriter, path string, r *http.Request) (title string
 		err = errors.New("Invalid page title.")
 	}
 	return
+}
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, viewPath+defaultPage, http.StatusFound)
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -80,6 +86,7 @@ func main() {
 	page := &Page{"TestPage", []byte("This is a sample page.")}
 	page.save()
 
+	http.HandleFunc(rootPath, rootHandler)
 	http.HandleFunc(viewPath, makeHandler(viewHandler))
 	http.HandleFunc(editPath, makeHandler(editHandler))
 	http.HandleFunc(savePath, makeHandler(saveHandler))
