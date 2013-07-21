@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"html/template"
 	"net/http"
 	"regexp"
 )
@@ -12,20 +11,11 @@ const (
 	viewPath    = "/view/"
 	editPath    = "/edit/"
 	savePath    = "/save/"
+	assetsPath  = "/assets/"
 	defaultPage = "Home"
 )
 
-var (
-	templates      = template.Must(template.ParseFiles("tmpl/view.html", "tmpl/edit.html"))
-	titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
-)
-
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl, p)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
+var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 
 func getTitle(w http.ResponseWriter, path string, r *http.Request) (title string, err error) {
 	title = r.URL.Path[len(path):]
@@ -47,7 +37,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 		return
 	}
 
-	renderTemplate(w, "view.html", page)
+	renderTemplate(w, viewTemplate, page)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -56,7 +46,7 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 		page = &Page{title, nil}
 	}
 
-	renderTemplate(w, "edit.html", page)
+	renderTemplate(w, editTemplate, page)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -70,6 +60,11 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	}
 
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+}
+
+func assetsHandler(w http.ResponseWriter, r *http.Request) {
+	file := r.URL.Path[1:]
+	http.ServeFile(w, r, file)
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
@@ -90,5 +85,6 @@ func main() {
 	http.HandleFunc(viewPath, makeHandler(viewHandler))
 	http.HandleFunc(editPath, makeHandler(editHandler))
 	http.HandleFunc(savePath, makeHandler(saveHandler))
+	http.HandleFunc(assetsPath, assetsHandler)
 	http.ListenAndServe("localhost:8080", nil)
 }
