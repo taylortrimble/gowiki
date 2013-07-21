@@ -21,7 +21,7 @@ var (
 	titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
 
-func renderTemplate(w http.ResponseWriter, p *Page, tmpl *template.Template) {
+func renderTemplate(w http.ResponseWriter, tmpl *template.Template, p *Page) {
 	err := tmpl.Execute(w, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
