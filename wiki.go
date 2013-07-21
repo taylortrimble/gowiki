@@ -55,12 +55,7 @@ func getTitle(w http.ResponseWriter, path string, r *http.Request) (title string
 	return
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title, err := getTitle(w, viewPath, r)
-	if err != nil {
-		return
-	}
-
+func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	page, err := loadPage(title)
 	if err != nil {
 		http.Redirect(w, r, editPath+title, http.StatusFound)
@@ -70,12 +65,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "view.html", page)
 }
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
-	title, err := getTitle(w, editPath, r)
-	if err != nil {
-		return
-	}
-
+func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	page, err := loadPage(title)
 	if err != nil {
 		page = &Page{title, nil}
@@ -84,16 +74,11 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "edit.html", page)
 }
 
-func saveHandler(w http.ResponseWriter, r *http.Request) {
-	title, err := getTitle(w, savePath, r)
-	if err != nil {
-		return
-	}
-
+func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
 
 	p := &Page{title, []byte(body)}
-	err = p.save()
+	err := p.save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -102,12 +87,22 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		title, err := getTitle(w, savePath, r)
+		if err != nil {
+			return
+		}
+		fn(w, r, title)
+	}
+}
+
 func main() {
 	page := &Page{"TestPage", []byte("This is a sample page.")}
 	page.save()
 
-	http.HandleFunc(viewPath, viewHandler)
-	http.HandleFunc(editPath, editHandler)
-	http.HandleFunc(savePath, saveHandler)
+	http.HandleFunc(viewPath, makeHandler(viewHandler))
+	http.HandleFunc(editPath, makeHandler(editHandler))
+	http.HandleFunc(savePath, makeHandler(saveHandler))
 	http.ListenAndServe("localhost:8080", nil)
 }
