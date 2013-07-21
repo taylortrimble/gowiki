@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	templates      = template.Must(template.ParseFiles("view.html", "edit.html"))
+	templates      = template.Must(template.ParseFiles("tmpl/view.html", "tmpl/edit.html"))
 	titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
 
