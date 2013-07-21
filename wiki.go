@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	viewPath, viewTemplate = "/view/", "view.html"
-	editPath, editTemplate = "/edit/", "edit.html"
-	savePath               = "/save/"
+	viewPath = "/view/"
+	editPath = "/edit/"
+	savePath = "/save/"
 )
 
 type Page struct {
@@ -32,12 +32,16 @@ func loadPage(title string) (*Page, error) {
 	return &Page{title, body}, err
 }
 
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	t, _ := template.ParseFiles(tmpl)
+	t.Execute(w, p)
+}
+
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len(viewPath):]
 	page, _ := loadPage(title)
 
-	t, _ := template.ParseFiles(viewTemplate)
-	t.Execute(w, page)
+	renderTemplate(w, "view.html", page)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,11 +51,11 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		page = &Page{title, nil}
 	}
 
-	t, _ := template.ParseFiles(editTemplate)
-	t.Execute(w, page)
+	renderTemplate(w, "edit.html", page)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
+	
 }
 
 func main() {
