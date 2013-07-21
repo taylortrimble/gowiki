@@ -2,10 +2,14 @@
 
 <h1>{{.Title}}</h1>
 
-<p>[<a href="/edit/{{.Title}}">edit</a>]</p>
+<hr>
 
 <div>
     {{printf "%s" .Body}}
 </div>
+
+<hr>
+
+<p><a class="btn" href="/edit/{{.Title}}">Edit</a></p>
 
 {{end}}

@@ -2,9 +2,13 @@
 
 <h1>Editing {{.Title}}</h1>
 
+<hr>
+
 <form action="/save/{{.Title}}" method="POST">
-    <div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
-    <div><input type="submit" value="Save"></div>
+    <div class="row-fluid">
+        <div><textarea class="span12" name="body" rows="20">{{printf "%s" .Body}}</textarea></div>
+        <div><input class="btn" type="submit" value="Save"></div>
+    </div>
 </form>
 
 {{end}}
