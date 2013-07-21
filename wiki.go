@@ -12,6 +12,7 @@ const (
 	viewPath    = "/view/"
 	editPath    = "/edit/"
 	savePath    = "/save/"
+	assetsPath  = "/assets/"
 	defaultPage = "Home"
 )
 
@@ -73,6 +74,11 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+func assetsHandler(w http.ResponseWriter, r *http.Request) {
+	file := r.URL.Path[1:]
+	http.ServeFile(w, r, file)
+}
+
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		title, err := getTitle(w, savePath, r)
@@ -91,5 +97,6 @@ func main() {
 	http.HandleFunc(viewPath, makeHandler(viewHandler))
 	http.HandleFunc(editPath, makeHandler(editHandler))
 	http.HandleFunc(savePath, makeHandler(saveHandler))
+	http.HandleFunc(assetsPath, assetsHandler)
 	http.ListenAndServe("localhost:8080", nil)
 }
